@@ -8,8 +8,10 @@ def extrair_com_filtros(img_path):
     img = cv2.imread(img_path)
     if img is None: return "Erro ao carregar"
 
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    config_tesseract = r'--psm 3'
+    img_grande = cv2.resize(img, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
+
+    gray = cv2.cvtColor(img_grande, cv2.COLOR_BGR2GRAY)
+    config_tesseract = r'--psm 1'
 
     _, f1 = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     texto1 = pytesseract.image_to_string(f1, lang='por', config=config_tesseract)
@@ -23,6 +25,10 @@ def extrair_com_filtros(img_path):
 
     resultados = [texto1.strip(), texto2.strip(), texto3.strip()]
     melhor_resultado = max(resultados, key=len)
+
+    cv2.imwrite('debug_f1_otsu.png', f1)
+    cv2.imwrite('debug_f2_adaptativo.png', f2)
+    cv2.imwrite('debug_f3_denoised.png', f3)
 
     return melhor_resultado
 
