@@ -15,3 +15,5 @@ def extrair_com_filtros(img_path):
     _, f1 = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     texto1 = pytesseract.image_to_string(f1, lang='por', config=config_tesseract)
 
+    f2 = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
+    texto2 = pytesseract.image_to_string(f2, lang='por', config=config_tesseract)
