@@ -32,11 +32,9 @@ def rotacionar_texto(imagem_binaria, imagem_original):
 
     return imagem_original
 
-def extrair_com_filtros(img_path):
-    img = cv2.imread(img_path)
-    if img is None: return "Erro ao carregar"
+def executar_pipeline_ocr(img_matriz):
 
-    img_grande = cv2.resize(img, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
+    img_grande = cv2.resize(img_matriz, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
 
     gray = cv2.cvtColor(img_grande, cv2.COLOR_BGR2GRAY)
     denoised_base = cv2.fastNlMeansDenoising(gray, h=10)
@@ -66,9 +64,12 @@ def extrair_com_filtros(img_path):
 
     return melhor_resultado
 
-caminhos = ['../images_test/imagemBoa.jpeg', '../images_test/imagemRuim.jpeg']
-
-for p in caminhos:
-    print(f"\n--- Resultado para {p} ---")
-    print(extrair_com_filtros(p))
-
+if __name__ == "__main__":
+    caminhos = ['../images_test/imagemBoa.jpeg', '../images_test/imagemRuim.jpeg']
+    for p in caminhos:
+        img_teste = cv2.imread(p)
+        if img_teste is not None:
+            print(f"\n--- Teste Local para {p} ---")
+            print(executar_pipeline_ocr(img_teste))
+        else:
+            print(f"Erro ao carregar o arquivo de teste local: {p}")
