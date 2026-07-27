@@ -1,5 +1,6 @@
 import cv2
 import pytesseract
+import pandas as pd
 from collections import Counter
 from spellchecker import SpellChecker
 
@@ -91,6 +92,63 @@ def votacao_majoritaria_5_filtros(textos):
     return " ".join(resultado_final)
 
 
+def analisar_layout_e_estruturar(imagem_binarizada):
+    data = pytesseract.image_to_data(imagem_binarizada, lang='por', config='--psm 3',
+                                     output_type=pytesseract.Output.DATAFRAME)
+
+    df = data[data['text'].notnull() & (data['text'].str.strip() != '')].copy()
+
+    if df.empty:
+        return {"titulo": "", "paragrafos": []}
+
+    linhas_agrupadas = []
+
+    for (block_num, par_num, line_num), group in df.groupby(['block_num', 'par_num', 'line_num']):
+        texto_linha = " ".join(group['text'].astype(str))
+        top_medio = group['top'].mean()
+        altura_media = group['height'].mean()
+
+        linhas_agrupadas.append({
+            'block_num': block_num,
+            'par_num': par_num,
+            'line_num': line_num,
+            'texto': texto_linha,
+            'top': top_medio,
+            'height': altura_media
+        })
+
+    df_linhas = pd.DataFrame(linhas_agrupadas)
+
+    if df_linhas.empty:
+        return {"titulo": "", "paragrafos": []}
+
+    altura_corte_topo = df_linhas['top'].min() + (df_linhas['top'].max() - df_linhas['top'].min()) * 0.35
+    linhas_topo = df_linhas[df_linhas['top'] <= altura_corte_topo]
+
+    if not linhas_topo.empty:
+        idx_titulo = linhas_topo['height'].idxmax()
+        linha_titulo = df_linhas.loc[idx_titulo]
+        titulo_bruto = linha_titulo['texto']
+        df_paragrafos = df_linhas.drop(idx_titulo)
+    else:
+        titulo_bruto = ""
+        df_paragrafos = df_linhas
+
+    paragrafos_brutos = []
+    for (block, par), group in df_paragrafos.groupby(['block_num', 'par_num']):
+        texto_paragrafo = " ".join(group['texto'].astype(str))
+        if len(texto_paragrafo.strip()) > 3:
+            paragrafos_brutos.append(texto_paragrafo)
+
+    titulo_corrigido = analisador_lexico_corretor(titulo_bruto) if titulo_bruto else ""
+    paragrafos_corrigidos = [analisador_lexico_corretor(p) for p in paragrafos_brutos]
+
+    return {
+        "titulo": titulo_corrigido,
+        "paragrafos": paragrafos_corrigidos
+    }
+
+
 def executar_pipeline_ocr(img_matriz):
     img_corrigida = detectar_e_rotacionar_por_borda(img_matriz)
 
@@ -98,6 +156,7 @@ def executar_pipeline_ocr(img_matriz):
     gray = cv2.cvtColor(img_grande, cv2.COLOR_BGR2GRAY)
 
     config_tesseract = r'--psm 3'
+
 
     # Filtro 1: Otsu
     _, f1 = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
@@ -128,10 +187,14 @@ def executar_pipeline_ocr(img_matriz):
     cv2.imwrite('../debbug_images/debug_f4_mean.png', f4)
     cv2.imwrite('../debbug_images/debug_f5_clahe.png', f5)
 
-
     textos_filtros = [texto1, texto2, texto3, texto4, texto5]
     texto_votado = votacao_majoritaria_5_filtros(textos_filtros)
-
     texto_final_corrigido = analisador_lexico_corretor(texto_votado)
 
-    return texto_final_corrigido
+    estrutura = analisar_layout_e_estruturar(f5)
+
+    return {
+        "texto_completo_votado": texto_final_corrigido,
+        "titulo": estrutura["titulo"],
+        "paragrafos": estrutura["paragrafos"]
+    }
