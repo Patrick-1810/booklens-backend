@@ -9,6 +9,7 @@
 [SQLALCHEMY_BADGE]: https://img.shields.io/badge/SQLAlchemy-D71F00?style=for-the-badge
 [OPENCV_BADGE]: https://img.shields.io/badge/OpenCV-5C3EE8?style=for-the-badge&logo=opencv&logoColor=white
 [TESSERACT_BADGE]: https://img.shields.io/badge/Tesseract-OCR-blue?style=for-the-badge
+[EASYOCR_BADGE]: https://img.shields.io/badge/EasyOCR-00C853?style=for-the-badge
 [JWT_BADGE]: https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=jsonwebtokens
 [PRS_BADGE]: https://img.shields.io/badge/PRs-Not%20Accepted-red?style=for-the-badge
 
