@@ -58,9 +58,9 @@ def executar_pipeline_ocr(img_matriz):
     resultados = [texto1.strip(), texto2.strip(), texto3.strip()]
     melhor_resultado = max(resultados, key=len)
 
-    cv2.imwrite('debug_f1_otsu_1.png', f1)
-    cv2.imwrite('debug_f2_adaptativo_2.png', f2)
-    cv2.imwrite('debug_f3_denoised_3.png', f3)
+    cv2.imwrite('../debbug_images/debug_f1_otsu_1.png', f1)
+    cv2.imwrite('../debbug_images/debug_f2_adaptativo_2.png', f2)
+    cv2.imwrite('../debbug_images/debug_f3_denoised_3.png', f3)
 
     return melhor_resultado
 
