@@ -13,18 +13,18 @@ class User(Base):
     senha_hash = Column(String(255), nullable=False)
     criado_em = Column(DateTime, default=datetime.utcnow)
 
-    trechos = relationship("TrechoLivro", back_populates="usuario", cascade="all, delete-orphan")
+    documentos = relationship("DocumentoPublico", back_populates="usuario", cascade="all, delete-orphan")
 
 
-class TrechoLivro(Base):
-    __tablename__ = "trechos_livros"
+class DocumentoPublico(Base):
+    __tablename__ = "documentos_publicos"
 
     id = Column(Integer, primary_key=True, index=True)
     nome_arquivo = Column(String(150))
     texto_extraido = Column(Text, nullable=False)
-    titulo_livro = Column(String(150), nullable=True, default="Desconhecido")
+    titulo_documento = Column(String(150), nullable=True, default="Documento sem título")
     criado_em = Column(DateTime, default=datetime.utcnow)
 
     usuario_id = Column(Integer, ForeignKey("users.id"), nullable=True)
 
-    usuario = relationship("User", back_populates="trechos")
+    usuario = relationship("User", back_populates="documentos")
