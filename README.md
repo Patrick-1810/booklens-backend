@@ -34,7 +34,7 @@
 
 <p align="center">
 
-Backend desenvolvido para o projeto <strong>BookLens</strong>, um sistema inteligente para digitalização e extração automática de informações de livros físicos utilizando Processamento Digital de Imagens (PDI) e Reconhecimento Óptico de Caracteres (OCR).
+Backend desenvolvido para o projeto <strong>BookLens</strong>, um sistema inteligente para digitalização e extração automática de informações de documentos públicos utilizando Processamento Digital de Imagens (PDI) e Reconhecimento Óptico de Caracteres (OCR).
 
 </p>
 
@@ -72,7 +72,7 @@ Backend desenvolvido para o projeto <strong>BookLens</strong>, um sistema inteli
 
 O **BookLens** é o projeto desenvolvido como Trabalho de Conclusão de Curso (TCC) em Ciência da Computação.
 
-A aplicação foi criada com o objetivo de automatizar a extração de informações bibliográficas de livros físicos através de técnicas de **Processamento Digital de Imagens (PDI)** e **Reconhecimento Óptico de Caracteres (OCR)**.
+A aplicação foi criada com o objetivo de automatizar a extração de informações de documentos públicos físicos através de técnicas de **Processamento Digital de Imagens (PDI)** e **Reconhecimento Óptico de Caracteres (OCR)**.
 
 O backend é responsável pelo processamento das imagens recebidas pelo frontend, aplicação dos filtros de melhoria, execução do OCR, validação das palavras utilizando um dicionário e gerenciamento dos usuários da aplicação.
 
@@ -80,7 +80,7 @@ O backend é responsável pelo processamento das imagens recebidas pelo frontend
 
 # 🎓 Objetivo do Projeto
 
-O projeto busca minimizar erros durante a digitalização de informações de livros físicos, utilizando técnicas computacionais capazes de melhorar significativamente a qualidade da imagem antes da extração textual.
+O projeto busca minimizar erros durante a digitalização de informações de documentos públicos, utilizando técnicas computacionais capazes de melhorar significativamente a qualidade da imagem antes da extração textual.
 
 Entre as etapas implementadas estão:
 
