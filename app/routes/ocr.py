@@ -4,7 +4,6 @@ import cv2
 import numpy as np
 import time
 
-
 from app.core.processor import executar_pipeline_ocr
 from app.database.config import get_db
 from app.database import models
@@ -28,29 +27,29 @@ async def extrair_texto(file: UploadFile = File(...), db: Session = Depends(get_
         resultado_ocr = executar_pipeline_ocr(img)
         tempo_total = round(time.time() - inicio_tempo, 2)
 
-        titulo_identificado = resultado_ocr["titulo"] if resultado_ocr["titulo"] else "Trecho sem título"
+        titulo_identificado = resultado_ocr["titulo"] if resultado_ocr["titulo"] else "Documento sem título"
 
-        novo_trecho = models.TrechoLivro(
+        novo_documento = models.DocumentoPublico(
             nome_arquivo=file.filename,
             texto_extraido=resultado_ocr["texto_completo_votado"],
-            titulo_livro=titulo_identificado
+            titulo_documento=titulo_identificado
         )
 
-        db.add(novo_trecho)
+        db.add(novo_documento)
         db.commit()
-        db.refresh(novo_trecho)
+        db.refresh(novo_documento)
 
         return {
             "sucesso": True,
-            "id_registro": novo_trecho.id,
-            "arquivo": novo_trecho.nome_arquivo,
+            "id_registro": novo_documento.id,
+            "arquivo": novo_documento.nome_arquivo,
             "tempo_processamento_segundos": tempo_total,
             "estrutura": {
                 "titulo": titulo_identificado,
                 "paragrafos": resultado_ocr["paragrafos"]
             },
             "texto_completo": resultado_ocr["texto_completo_votado"],
-            "salvo_em": novo_trecho.criado_em.strftime("%d/%m/%Y %H:%M:%S")
+            "salvo_em": novo_documento.criado_em.strftime("%d/%m/%Y %H:%M:%S")
         }
 
     except Exception as e:
