@@ -23,6 +23,7 @@ class DocumentoPublico(Base):
     nome_arquivo = Column(String(150))
     texto_extraido = Column(Text, nullable=False)
     titulo_documento = Column(String(150), nullable=True, default="Documento sem título")
+    elementos_formatados = Column(Text, nullable=True) # <-- ADICIONADO AQUI
     criado_em = Column(DateTime, default=datetime.utcnow)
 
     usuario_id = Column(Integer, ForeignKey("users.id"), nullable=True)

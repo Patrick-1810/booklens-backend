@@ -1,8 +1,9 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
-from sqlalchemy.orm import Session
+import json
+import time
 import cv2
 import numpy as np
-import time
+from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
+from sqlalchemy.orm import Session
 
 from app.core.processor import executar_pipeline_ocr
 from app.database.config import get_db
@@ -32,7 +33,8 @@ async def extrair_texto(file: UploadFile = File(...), db: Session = Depends(get_
         novo_documento = models.DocumentoPublico(
             nome_arquivo=file.filename,
             texto_extraido=resultado_ocr["texto_completo_votado"],
-            titulo_documento=titulo_identificado
+            titulo_documento=titulo_identificado,
+            elementos_formatados=json.dumps(resultado_ocr["elementos"], ensure_ascii=False)
         )
 
         db.add(novo_documento)
@@ -46,9 +48,13 @@ async def extrair_texto(file: UploadFile = File(...), db: Session = Depends(get_
             "tempo_processamento_segundos": tempo_total,
             "estrutura": {
                 "titulo": titulo_identificado,
-                "paragrafos": resultado_ocr["paragrafos"]
+                "paragrafos": resultado_ocr["paragrafos"],
+                "elementos": resultado_ocr["elementos"],
+                "largura_pagina": resultado_ocr["largura_pagina"],
+                "altura_pagina": resultado_ocr["altura_pagina"]
             },
             "texto_completo": resultado_ocr["texto_completo_votado"],
+            "palavras_suspeitas": resultado_ocr["palavras_suspeitas"],
             "salvo_em": novo_documento.criado_em.strftime("%d/%m/%Y %H:%M:%S")
         }
 
