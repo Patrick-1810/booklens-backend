@@ -28,13 +28,17 @@ async def extrair_texto(file: UploadFile = File(...), db: Session = Depends(get_
         resultado_ocr = executar_pipeline_ocr(img)
         tempo_total = round(time.time() - inicio_tempo, 2)
 
-        titulo_identificado = resultado_ocr["titulo"] if resultado_ocr["titulo"] else "Documento sem título"
+        # Trata o campo de forma segura garantindo conversão para string pura
+        titulo_extraido = str(resultado_ocr.get("titulo") or "Documento sem título").strip()
+
+        # Garante fallback se o texto retornado for vazio
+        titulo_identificado = titulo_extraido if titulo_extraido else "Documento sem título"
 
         novo_documento = models.DocumentoPublico(
             nome_arquivo=file.filename,
             texto_extraido=resultado_ocr["texto_completo_votado"],
             titulo_documento=titulo_identificado,
-            elementos_formatados=json.dumps(resultado_ocr["elementos"], ensure_ascii=False)
+            elementos_formatados=resultado_ocr["elementos"]
         )
 
         db.add(novo_documento)
