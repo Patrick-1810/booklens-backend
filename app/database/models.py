@@ -26,7 +26,8 @@ class DocumentoPublico(Base):
     titulo_documento = Column(Text, nullable=True, default="Documento sem título")
 
     elementos_formatados = Column(JSONB, nullable=True)
-
+    anotacoes = Column(Text, nullable=True)
+    
     criado_em = Column(DateTime(timezone=True), server_default=func.now())
 
     usuario_id = Column(Integer, ForeignKey("users.id"), nullable=True)
