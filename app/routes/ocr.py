@@ -2,13 +2,14 @@ import time
 import cv2
 import numpy as np
 from typing import List, Optional, Any
-from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
+from fastapi import APIRouter, UploadFile, File, HTTPException, Depends, status
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.core.processor import executar_pipeline_ocr
 from app.database.config import get_db
 from app.database import models
+from app.core.security import obter_usuario_atual
 
 from datetime import datetime
 from app.core.docling_processor import executar_docling
@@ -28,7 +29,12 @@ class DocumentoUpdate(BaseModel):
 # --- ROTAS DA API ---
 
 @router.post("/extrair-texto")
-async def extrair_texto(file: UploadFile = File(...), db: Session = Depends(get_db)):
+async def extrair_texto(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    usuario_atual: models.User = Depends(obter_usuario_atual),
+):
+    """Extrai texto de uma imagem via OCR. Requer autenticação."""
     if not file.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="O arquivo enviado precisa ser uma imagem válida.")
 
@@ -53,7 +59,8 @@ async def extrair_texto(file: UploadFile = File(...), db: Session = Depends(get_
             nome_arquivo=file.filename,
             texto_extraido=resultado_ocr["texto_completo_votado"],
             titulo_documento=titulo_identificado,
-            elementos_formatados=resultado_ocr["elementos"]
+            elementos_formatados=resultado_ocr["elementos"],
+            usuario_id=usuario_atual.id,
         )
 
         db.add(novo_documento)
@@ -90,10 +97,23 @@ async def extrair_texto(file: UploadFile = File(...), db: Session = Depends(get_
 
 
 @router.put("/documentos/{doc_id}")
-async def atualizar_documento(doc_id: int, dados: DocumentoUpdate, db: Session = Depends(get_db)):
+async def atualizar_documento(
+    doc_id: int,
+    dados: DocumentoUpdate,
+    db: Session = Depends(get_db),
+    usuario_atual: models.User = Depends(obter_usuario_atual),
+):
+    """Atualiza um documento. Requer autenticação e que o documento pertença ao usuário."""
     doc = db.query(models.DocumentoPublico).filter(models.DocumentoPublico.id == doc_id).first()
     if not doc:
         raise HTTPException(status_code=404, detail="Documento não encontrado.")
+
+    # Valida que o documento pertence ao usuário autenticado
+    if doc.usuario_id is not None and doc.usuario_id != usuario_atual.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Você não tem permissão para editar este documento."
+        )
 
     try:
         if dados.titulo is not None:
